@@ -9,6 +9,7 @@ from rest_framework.authentication import BaseAuthentication, TokenAuthenticatio
 from rest_framework.viewsets import ModelViewSet
 from rest_framework import mixins, status
 from rest_framework.pagination import PageNumberPagination
+from django.shortcuts import get_object_or_404
 
 
 class UpdateDestroyAPIView(mixins.UpdateModelMixin,
@@ -38,7 +39,7 @@ class CustomPagination(PageNumberPagination):
         })
     
 class PostListAPIView(ListCreateAPIView):
-    queryset = Post.objects.all()
+    queryset = Post.objects.select_related('author').all()
     serializer_class = PostListSerializer
     pagination_class = CustomPagination
     permission_classes = [IsAuthorOrReadOnly]
@@ -47,11 +48,20 @@ class PostDetailAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Post.objects.all()
     serializer_class = PostDetailSerializer
     lookup_field = 'id'
+    permission_classes = [IsAuthorOrReadOnly]
 
 class CommentListAPIView(ListCreateAPIView):
-    queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     permission_classes = [IsAuthorOrReadOnly]
+
+    def get_queryset(self):
+        post_id = self.kwargs.get('post_id')
+        return Comment.objects.select_related('author').filter(post_id=post_id)
+    
+    def perform_create(self, serializer):
+        post_id = self.kwargs.get('post_id')
+        post = get_object_or_404(Post, id=post_id)
+        serializer.save(author=self.request.user, post=post)
 
 class CommentDetailAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Comment.objects.all()
