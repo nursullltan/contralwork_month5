@@ -4,9 +4,8 @@ from .models import Post, Comment
 from .serializers import (AuthorSerializer, CommentSerializer, 
                           PostListSerializer, PostDetailSerializer)
 from .permission import IsAuthorOrReadOnly
-from rest_framework.generics import ListAPIView, ListCreateAPIView, GenericAPIView, DestroyAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import ListCreateAPIView, GenericAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.authentication import BaseAuthentication, TokenAuthentication
-from rest_framework.viewsets import ModelViewSet
 from rest_framework import mixins, status
 from rest_framework.pagination import PageNumberPagination
 from django.shortcuts import get_object_or_404
